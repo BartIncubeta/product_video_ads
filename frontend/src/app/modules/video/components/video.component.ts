@@ -23,9 +23,9 @@ import { Base } from 'app/models/base';
 import { OfferType } from 'app/models/offertype';
 import { Video } from 'app/models/video';
 import { VideoMetadata } from 'app/models/video_metadata';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; // Update import for SafeResourceUrl
 import { AdsMetadata } from 'app/models/ads_metadata';
-import {MatDialog} from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { InfoVideoDialog } from './info_video.component';
 import { environment } from 'environments/environment';
 
@@ -37,10 +37,10 @@ import { environment } from 'environments/environment';
 })
 export class VideoComponent implements OnInit {
 
-  drive_url = environment.drive_file_prefix
-  yt_url = environment.youtube_prefix
-  displayedColumns = ['date', 'name', 'base', 'status', 'download', 'delete', 'info']
-  visibilities = ['unlisted', 'public']
+  drive_url = environment.drive_file_prefix;
+  yt_url = environment.youtube_prefix;
+  displayedColumns = ['date', 'name', 'base', 'status', 'download', 'delete', 'info'];
+  visibilities = ['unlisted', 'public'];
   ad_group_types = [['TRUE_VIEW_IN_STREAM', 'TRUE_VIEW_IN_STREAM'],
   ['TRUE_VIEW_IN_STREAM', 'TRUE_VIEW_FOR_ACTION'],
   ['TRUE_VIEW_IN_DISPLAY', 'TRUE_VIEW_IN_DISPLAY'],
@@ -48,45 +48,45 @@ export class VideoComponent implements OnInit {
   ['BUMPER', 'BUMPER']]
 
   // Data to view flowing from services
-  bases$ : Observable<Base[]>
-  products_sheets$ : Observable<string[]>
-  offer_types$ : Observable<OfferType[]>
-  videos$ : Observable<Video[]>
-  logs$ : Observable<string[]>
+  bases$ : Observable<Base[]>;
+  products_sheets$ : Observable<string[]>;
+  offer_types$ : Observable<OfferType[]>;
+  videos$ : Observable<Video[]>;
+  logs$ : Observable<string[]>;
 
   // Chosen screen options
-  base : Base
-  product_sheet : string
-  products : Product[]
-  mode : string
-  youtube : boolean
-  custom_dir : boolean
+  base : Base;
+  product_sheet : string;
+  products : Product[];
+  mode : string;
+  youtube : boolean;
+  custom_dir : boolean;
 
   // Video configuration from screen (bulk)
-  product_groups : Map<string, Product[]>
-  product_groups_validations : Map<string, string[]>
-  selected_groups : Map<string,  any> = new Map<string, any>()
-  final_configs : Array<any>
+  product_groups : Map<string, Product[]>;
+  product_groups_validations : Map<string, string[]>;
+  selected_groups : Map<string,  any> = new Map<string, any>();
+  final_configs : Array<any>;
 
   // Video configuration from screen (single)
-  selected_offer_types : Array<string>
-  selected_products: Array<string>
-  video_metadata : any
-  ads_metadata : any
-  custom_dir_name : String
+  selected_offer_types : Array<string>;
+  selected_products: Array<string>;
+  video_metadata : any;
+  ads_metadata : any;
+  custom_dir_name : String;
   
   constructor(private facade : VideoFacade, public sanitizer: DomSanitizer, public dialog: MatDialog, private _snackBar: MatSnackBar) {
-      this.bases$ = this.facade.bases$
-      this.products_sheets$ = this.facade.products_sheets$
-      this.offer_types$ = this.facade.offer_types$
-      this.videos$ = this.facade.videos
-      this.logs$ = this.facade.logs
-    }
+      this.bases$ = this.facade.bases$;
+      this.products_sheets$ = this.facade.products_sheets$;
+      this.offer_types$ = this.facade.offer_types$;
+      this.videos$ = this.facade.videos;
+      this.logs$ = this.facade.logs;
+  }
     
-    ngOnInit() {
-      this.clear_screen_selections()
-      this.facade.reload_products_sheets()
-    }
+  ngOnInit() {  
+    this.clear_screen_selections();
+    this.facade.reload_products_sheets();
+  }
 
     is_video(video : Video) {
       const video_base = this.facade.bases.filter(b => b.title == video.video_metadata.base_video)[0]
@@ -267,14 +267,14 @@ export class VideoComponent implements OnInit {
     }
 
     private clear_screen_selections() {
-      this.final_configs = []
-      this.video_metadata = {}
-      this.ads_metadata = {}
-      this.base = undefined
-      this.custom_dir_name = undefined
-      this.products = undefined
-      this.product_sheet = undefined
-      this.mode = ''
+      this.final_configs = [];
+      this.video_metadata = {};
+      this.ads_metadata = {};
+      this.base = undefined;
+      this.custom_dir_name = undefined;
+      this.products = undefined;
+      this.product_sheet = undefined;
+      this.mode = '';
     }
 
     
@@ -358,9 +358,9 @@ export class VideoComponent implements OnInit {
     }
 
     info_asset(video: Video) {
-      let url = '';
+      let url: SafeResourceUrl | string = '';  // Change the type to SafeResourceUrl | string
       let type = '';
-  
+
       // Use video status to determine if it's YouTube or Google Drive
       if (['Running', 'Video Ready', 'On'].indexOf(video.status) >= 0) {
           // Assume it's a YouTube video and the full YouTube URL is in generated_video
@@ -371,11 +371,11 @@ export class VideoComponent implements OnInit {
           url = this.sanitizer.bypassSecurityTrustResourceUrl(video.generated_video);
           type = 'drive';
       }
-  
+
       console.log('Generated Video:', video.generated_video);
       console.log('Video URL:', url);
       console.log('Video Type:', type);
-  
+
       this.dialog.open(InfoVideoDialog, {
           width: '1000px',
           data: {
