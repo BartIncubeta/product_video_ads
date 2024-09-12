@@ -360,16 +360,17 @@ export class VideoComponent implements OnInit {
     info_asset(video: Video) {
         let url, type;
     
-        // Ensure the correct URL and type are used for YouTube vs. Google Drive
         if (video.generated_video.includes(environment.youtube_prefix)) {
-            // This assumes video.generated_video contains a full YouTube link, so we extract the ID
-            const videoId = video.generated_video.split('v=')[1] || video.generated_video;  // Use the ID part of the YouTube URL
-            url = this.sanitizer.bypassSecurityTrustResourceUrl(this.yt_url + videoId);
+            // Keep original logic for YouTube URLs
+            url = this.sanitizer.bypassSecurityTrustResourceUrl(video.generated_video);  // Original logic for YouTube URLs
             type = 'youtube';
         } else if (video.generated_video.includes(environment.drive_file_prefix)) {
-            url = this.sanitizer.bypassSecurityTrustResourceUrl(video.generated_video);
+            // Handle Google Drive URLs correctly
+            url = this.sanitizer.bypassSecurityTrustResourceUrl('https://drive.google.com/file/d/' + video.generated_video + '/preview');
             type = 'drive';
         }
+        console.log('Video URL:', url);
+        console.log('Video Type:', type);
     
         this.dialog.open(InfoVideoDialog, {
             width: '1000px',
@@ -380,6 +381,7 @@ export class VideoComponent implements OnInit {
             }
         });
     }
+  
   
 
     indexTracker(index: number, value: any) {
