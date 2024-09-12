@@ -77,17 +77,15 @@
     </div>
 
     <div class="video-content">
-        <!-- Embed Google Drive video using iframe -->
-        <iframe *ngIf="data.type == 'drive'" [src]="data.url" width="700" height="390" frameborder="0" 
-                allow="autoplay; encrypted-media" allowfullscreen>
-        </iframe>
+        <!-- Google Drive video embedded in an iframe -->
+        <iframe *ngIf="data.type === 'drive'" [src]="data.url" width="700" height="390" frameborder="0"
+                allow="autoplay; encrypted-media" allowfullscreen></iframe>
     
-        <!-- YouTube embed -->
-        <iframe *ngIf="data.type == 'youtube'" width="700" height="390"
-                [src]="data.url" frameborder="0" 
-                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-        </iframe>
+        <!-- YouTube video embedded in an iframe -->
+        <iframe *ngIf="data.type === 'youtube'" [src]="data.url" width="700" height="390" frameborder="0"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
+    
     
 </div>
 

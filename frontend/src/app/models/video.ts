@@ -29,47 +29,61 @@ export class Video {
         public cloud_preview: boolean = false
         ) {}
         
-    public static from_video_array(video_array : Array<any>) : Video {
-        let generated_video: string = ''
-        let cloud_preview = false
-
-        if (video_array && video_array[4]) {
-            generated_video = video_array[4]
-            if (generated_video.includes(environment.gsutil_uri_prefix)) {
-                cloud_preview = true
-                generated_video = generated_video.replace(
-                    environment.gsutil_uri_prefix, environment.gcs_url_prefix)
-            } else {
-                generated_video = 'https://drive.google.com/file/d/' + generated_video + '/preview';
-
+        public static from_video_array(video_array: Array<any>): Video {
+            let generated_video: string = '';
+            let cloud_preview = false;
+        
+            if (video_array && video_array[4]) {
+                generated_video = video_array[4];
+        
+                // Check if it's a Google Cloud Storage video
+                if (generated_video.includes(environment.gsutil_uri_prefix)) {
+                    cloud_preview = true;
+                    generated_video = generated_video.replace(
+                        environment.gsutil_uri_prefix, environment.gcs_url_prefix
+                    );
+                }
+                // Check if it's a YouTube video
+                else if (generated_video.includes('youtube.com') || generated_video.includes('youtu.be')) {
+                    // Keep the YouTube URL as it is
+                    generated_video = generated_video;
+                }
+                // Otherwise, assume it's a Google Drive video
+                else {
+                    generated_video = 'https://drive.google.com/file/d/' + generated_video + '/preview';
+                }
             }
+        
+            return new Video(
+                video_array[0],
+                AdsMetadata.from_string_object(video_array[1]),
+                VideoMetadata.from_string_object(video_array[2]),
+                video_array[3],
+                generated_video,
+                cloud_preview
+            );
         }
         
-        return new Video(
-            video_array[0],
-            AdsMetadata.from_string_object(video_array[1]),
-            VideoMetadata.from_string_object(video_array[2]),
-            video_array[3],
-            generated_video,
-            cloud_preview
-        )
-    }
             
-    public static to_video_array(video : Video) : Array<any> {
-        let generated_video = video.generated_video
-        if (video.cloud_preview) {
-            generated_video = generated_video.replace(
-                environment.gcs_url_prefix, environment.gsutil_uri_prefix)
-        } else {
-            generated_video = generated_video.split(environment.drive_file_prefix)[1]
+        public static to_video_array(video: Video): Array<any> {
+            let generated_video = video.generated_video;
+        
+            if (video.cloud_preview) {
+                generated_video = generated_video.replace(
+                    environment.gcs_url_prefix, environment.gsutil_uri_prefix
+                );
+            } else if (generated_video.includes('drive.google.com')) {
+                // For Google Drive videos, split based on the prefix to get the file ID
+                generated_video = generated_video.split('/d/')[1].split('/preview')[0];
+            }
+        
+            return [
+                video.id,
+                AdsMetadata.to_string_object(video.ads_metadata),
+                VideoMetadata.to_string_object(video.video_metadata),
+                video.status,
+                generated_video
+            ];
         }
-
-        return [
-            video.id,
-            AdsMetadata.to_string_object(video.ads_metadata),
-            VideoMetadata.to_string_object(video.video_metadata),
-            video.status,
-            generated_video
-        ]
-    }
+        
 }
