@@ -34,11 +34,11 @@ export class Video {
 
         if (video_array && video_array[4]) {
             generated_video = video_array[4];
-
+            console.log("generated_video: " + generated_video)
             // Determine if the video is from YouTube or Google Drive based on status
             if (['Running', 'Video Ready', 'On'].indexOf(video_array[3]) >= 0) {
                 // Assume YouTube video and leave the URL as is
-                generated_video = video_array[4];
+                generated_video = environment.youtube_prefix + video_array[4];
             } else if (generated_video.includes(environment.gsutil_uri_prefix)) {
                 // Google Cloud Storage video
                 cloud_preview = true;
