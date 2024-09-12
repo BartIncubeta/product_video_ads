@@ -358,35 +358,34 @@ export class VideoComponent implements OnInit {
     }
 
     info_asset(video: Video) {
-        let url, type;
-        
-        if (video.generated_video.includes('youtube.com') || video.generated_video.includes('youtu.be')) {
-            // Assume it already has a valid YouTube link
-            url = this.sanitizer.bypassSecurityTrustResourceUrl(video.generated_video);
-            type = 'youtube';
-        } else if (video.generated_video.includes(environment.youtube_prefix)) {
-            // Assume it's a YouTube ID and prepend the YouTube URL prefix
-            url = this.sanitizer.bypassSecurityTrustResourceUrl(this.yt_url + video.generated_video);
-            type = 'youtube';
-        } else if (video.generated_video.includes(environment.drive_file_prefix)) {
-            // Assume it's a Google Drive file ID and format it properly
-            url = this.sanitizer.bypassSecurityTrustResourceUrl('https://drive.google.com/file/d/' + video.generated_video + '/preview');
-            type = 'drive';
-        }
-    
-        console.log('Generated Video:', video.generated_video);
-        console.log('Video URL:', url);
-        console.log('Video Type:', type);
-    
-        this.dialog.open(InfoVideoDialog, {
-            width: '1000px',
-            data: {
-                video: video,
-                type: type,
-                url: url
-            }
-        });
-    }
+      let url = '';
+      let type = '';
+  
+      // Use video status to determine if it's YouTube or Google Drive
+      if (['Running', 'Video Ready', 'On'].indexOf(video.status) >= 0) {
+          // Assume it's a YouTube video and the full YouTube URL is in generated_video
+          url = this.sanitizer.bypassSecurityTrustResourceUrl(video.generated_video);
+          type = 'youtube';
+      } else {
+          // Otherwise, assume it's a Google Drive video
+          url = this.sanitizer.bypassSecurityTrustResourceUrl(video.generated_video);
+          type = 'drive';
+      }
+  
+      console.log('Generated Video:', video.generated_video);
+      console.log('Video URL:', url);
+      console.log('Video Type:', type);
+  
+      this.dialog.open(InfoVideoDialog, {
+          width: '1000px',
+          data: {
+              video: video,
+              type: type,
+              url: url
+          }
+      });
+  }
+  
   
   
   
