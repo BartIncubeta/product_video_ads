@@ -40,7 +40,8 @@ export class Video {
                 generated_video = generated_video.replace(
                     environment.gsutil_uri_prefix, environment.gcs_url_prefix)
             } else {
-                generated_video = environment.drive_file_prefix + generated_video
+                generated_video = 'https://drive.google.com/file/d/' + generated_video + '/preview';
+
             }
         }
         

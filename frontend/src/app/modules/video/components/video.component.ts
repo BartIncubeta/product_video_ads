@@ -357,28 +357,30 @@ export class VideoComponent implements OnInit {
       return 'black'
     }
 
-    info_asset(video : Video) {
-
-      let url, type
-
-      // Reason if it's youtube or drive video hosted
-      if (['Running', 'Video Ready', 'On'].indexOf(video.status) >= 0) {
-        url = this.sanitizer.bypassSecurityTrustResourceUrl(this.yt_url + video.generated_video)
-        type = 'youtube'
-      } else {
-        url = video.generated_video
-        type = 'drive'
-      }     
-
-      this.dialog.open(InfoVideoDialog, {
-        width: '1000px',
-        data: {
-          video: video,
-          type: type,
-          url: url
+    info_asset(video: Video) {
+        let url, type;
+    
+        // Ensure the correct URL and type are used for YouTube vs. Google Drive
+        if (video.generated_video.includes(environment.youtube_prefix)) {
+            // This assumes video.generated_video contains a full YouTube link, so we extract the ID
+            const videoId = video.generated_video.split('v=')[1] || video.generated_video;  // Use the ID part of the YouTube URL
+            url = this.sanitizer.bypassSecurityTrustResourceUrl(this.yt_url + videoId);
+            type = 'youtube';
+        } else if (video.generated_video.includes(environment.drive_file_prefix)) {
+            url = this.sanitizer.bypassSecurityTrustResourceUrl(video.generated_video);
+            type = 'drive';
         }
-      })
+    
+        this.dialog.open(InfoVideoDialog, {
+            width: '1000px',
+            data: {
+                video: video,
+                type: type,
+                url: url
+            }
+        });
     }
+  
 
     indexTracker(index: number, value: any) {
       return index;
