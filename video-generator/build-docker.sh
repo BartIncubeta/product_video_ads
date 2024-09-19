@@ -19,5 +19,6 @@ TOKEN_FILE=token
 if ! test -f "$TOKEN_FILE"; then
   python3 authenticator.py
 fi
+python3 authenticator.py
 
 docker build -t video-generator .
