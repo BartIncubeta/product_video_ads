@@ -39,7 +39,7 @@ create_cluster(){
 echo 'Installing Video Generator on Kubernetes Engine...'
 
 echo 'Storing Desktop authentication credentials for use by video-generator-cluster'
-pip install -q google-cloud-secret-manager
+pip3 install -q google-cloud-secret-manager
 export GCP_PROJECT_NUMBER=$(gcloud projects describe $GOOGLE_CLOUD_PROJECT --format="value(projectNumber)")
 if gcloud secrets describe $SECRET_ID >> /dev/null; then
     read -p 'Previous token found, do you want to replace it? [y/N] ' -n 1 -r
