@@ -27,7 +27,7 @@ function getProductsFromMerchantCenter() {
     productsToSheetAppender(feedSheet));
 }
 
-function productsToSheetAppender(feedSheet) {
+function productsToSheetAppenderOLD(feedSheet) {
   const selectedFields = feedSheet.getDataRange().getValues()[0];
   return products => {
     let productData = products
@@ -35,6 +35,45 @@ function productsToSheetAppender(feedSheet) {
       .map(product => productToSheetRow(product, selectedFields));
     feedSheet.getRange(feedSheet.getDataRange().getLastRow() + 1, 1, productData.length, productData[0].length).setValues(productData);
   }
+}
+////////////////////////////////
+function productsToSheetAppender(feedSheet) {
+  const selectedFields = feedSheet.getDataRange().getValues()[0];
+  return products => {
+    console.log('Number of products received:', products.length);
+    
+    let filteredProducts = products.filter(product => {
+      const included = includeProduct(product);
+      if (!included) {
+        console.log('Excluding product:', product);
+      }
+      return included;
+    });
+    
+    console.log('Number of products after filtering:', filteredProducts.length);
+
+    let productData = filteredProducts.map(product => {
+      const row = productToSheetRow(product, selectedFields);
+      if (row.length !== selectedFields.length + (DEBUG ? 1 : 0)) {
+        console.log('Error converting product to row:', product);
+      }
+      return row;
+    });
+
+    console.log('Number of products after mapping:', productData.length);
+
+    if (productData.length === 0) {
+      console.log('No products to append.');
+      return;
+    }
+
+    feedSheet.getRange(
+      feedSheet.getDataRange().getLastRow() + 1,
+      1,
+      productData.length,
+      productData[0].length
+    ).setValues(productData);
+  };
 }
 
 function clearData(sheet) {
@@ -44,7 +83,7 @@ function clearData(sheet) {
   SpreadsheetApp.flush();
 }
 
-function productToSheetRow(product, selectedFields) {
+function productToSheetRowOLD(product, selectedFields) {
   try {
     let sheetRow = selectedFields.map(name => deep_value(product, name));
     sheetRow.push(extractPvaId(product));
@@ -57,10 +96,37 @@ function productToSheetRow(product, selectedFields) {
     return new Array(selectedFields.length + DEBUG ? 1 : 0);
   }
 }
+//////////////////////////////////////////
+function productToSheetRow(product, selectedFields) {
+  try {
+    let sheetRow = selectedFields.map(name => deep_value(product, name));
+    sheetRow.push(extractPvaId(product));
+    if (DEBUG) {
+      sheetRow.push(JSON.stringify(product));
+    }
+    return sheetRow;
+  } catch (e) {
+    console.log('Error in productToSheetRow:', e);
+    return new Array(selectedFields.length + (DEBUG ? 1 : 0));
+  }
+}
 
-function includeProduct(product) {
+
+function includeProductOLD(product) {
   if (FILTER_MC_FEED) {
     return product.customAttributes && product.customAttributes.some(a => a.name == "pva id");
+  } else {
+    return true;
+  }
+}
+////////////////////////////////////
+function includeProduct(product) {
+  if (FILTER_MC_FEED) {
+    const hasPvaId = product.customAttributes && product.customAttributes.some(a => a.name == "pva id");
+    if (!hasPvaId) {
+      console.log('Excluding product without PVA ID:', product);
+    }
+    return hasPvaId;
   } else {
     return true;
   }
@@ -141,7 +207,7 @@ function retrieveProductsInformation(productIds, contentLanguage, targetCountry)
 
           products[e.batchId] = {
             title: get_product_title(product),
-            price: format_brazil_price(get_product_price(product)),
+            price: get_product_price(product),
             image: get_product_image(product)
           }
         } catch (err) {
@@ -155,10 +221,6 @@ function retrieveProductsInformation(productIds, contentLanguage, targetCountry)
   })
 
   return products
-}
-
-function format_brazil_price(price) {
-  return 'R$ ' + price.replace(/,/g, '').replace(/\./g, ',')
 }
 
 function get_product_price(product) {
